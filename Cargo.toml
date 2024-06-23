@@ -2,5 +2,11 @@
 name = "simple_txtar"
 version = "0.1.0"
 edition = "2021"
-
-[dependencies]
+authors = ["sminez <innes.andersonmorrison@gmail.com>"]
+license = "MIT"
+repository = "https://github.com/sminez/simple_txtar"
+documentation = "https://docs.rs/simple_txtar"
+readme = "README.md"
+description = "A simple implementation of the txtar archive format"
+keywords = ["txtar", "archive"]
+categories = ["development-tools", "development-tools::testing"]
