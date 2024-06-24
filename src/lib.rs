@@ -104,15 +104,16 @@ impl Builder {
     /// use simple_txtar::{Builder, File};
     ///
     /// let mut builder = Builder::new();
-    /// let archive = builder
+    /// builder
     ///     .comment("a comment")
     ///     .file(("example-1", "foo"))
-    ///     .file(File::new("example-2", "bar"))
-    ///     .build();
+    ///     .file(File::new("example-2", "bar"));
+    ///
+    /// let archive = builder.build();
     ///
     /// assert_eq!(archive.comment(), "a comment");
     /// ```
-    pub fn comment(mut self, comment: impl Into<String>) -> Self {
+    pub fn comment(&mut self, comment: impl Into<String>) -> &mut Self {
         self.inner.comment = comment.into();
         self
     }
@@ -124,15 +125,16 @@ impl Builder {
     /// use simple_txtar::{Builder, File};
     ///
     /// let mut builder = Builder::new();
-    /// let archive = builder
+    /// builder
     ///     .comment("a comment")
     ///     .file(("example-1", "foo"))
-    ///     .file(File::new("example-2", "bar"))
-    ///     .build();
+    ///     .file(File::new("example-2", "bar"));
+    ///
+    /// let archive = builder.build();
     ///
     /// assert_eq!(archive["example-1"].content, "foo");
     /// ```
-    pub fn file(mut self, file: impl Into<File>) -> Self {
+    pub fn file(&mut self, file: impl Into<File>) -> &mut Self {
         self.inner.files.push(file.into());
         self
     }
@@ -144,11 +146,12 @@ impl Builder {
     /// use simple_txtar::{Builder, File};
     ///
     /// let mut builder = Builder::new();
-    /// let archive = builder
+    /// builder
     ///     .comment("a comment")
     ///     .file(("example-1", "foo"))
-    ///     .file(File::new("example-2", "bar"))
-    ///     .build();
+    ///     .file(File::new("example-2", "bar"));
+    ///
+    /// let archive = builder.build();
     ///
     /// let s = archive.to_string();
     /// let expected = "\
