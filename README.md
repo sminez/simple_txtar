@@ -1,3 +1,6 @@
+[![crates.io version](https://img.shields.io/crates/v/simple_txtar)](https://crates.io/crates/simple_txtar) [![docs.rs](https://img.shields.io/docsrs/simple_txtar?logo=rust)](https://docs.rs/simple_txtar)
+
+
 # A simple txtar parser for Rust
 
 A simple implementation of the go [txtar](https://github.com/golang/tools/blob/master/txtar/archive.go)

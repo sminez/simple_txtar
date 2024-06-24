@@ -85,6 +85,87 @@ const MARKER: &str = "-- ";
 const MARKER_END: &str = " --";
 const MARKER_LEN: usize = MARKER.len() + MARKER_END.len();
 
+/// Programatically build out a new [Archive] for later serialization as a txtar string.
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct Builder {
+    inner: Archive,
+}
+
+impl Builder {
+    /// Construct a new empty [Builder].
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Set the top level comment for the resulting [Archive].
+    ///
+    /// ## Example
+    /// ```rust
+    /// use simple_txtar::{Builder, File};
+    ///
+    /// let mut builder = Builder::new();
+    /// let archive = builder
+    ///     .comment("a comment")
+    ///     .file(("example-1", "foo"))
+    ///     .file(File::new("example-2", "bar"))
+    ///     .build();
+    ///
+    /// assert_eq!(archive.comment(), "a comment");
+    /// ```
+    pub fn comment(mut self, comment: impl Into<String>) -> Self {
+        self.inner.comment = comment.into();
+        self
+    }
+
+    /// Set the top level comment for the resulting [Archive].
+    ///
+    /// ## Example
+    /// ```rust
+    /// use simple_txtar::{Builder, File};
+    ///
+    /// let mut builder = Builder::new();
+    /// let archive = builder
+    ///     .comment("a comment")
+    ///     .file(("example-1", "foo"))
+    ///     .file(File::new("example-2", "bar"))
+    ///     .build();
+    ///
+    /// assert_eq!(archive["example-1"].content, "foo");
+    /// ```
+    pub fn file(mut self, file: impl Into<File>) -> Self {
+        self.inner.files.push(file.into());
+        self
+    }
+
+    /// Set the top level comment for the resulting [Archive].
+    ///
+    /// ## Example
+    /// ```rust
+    /// use simple_txtar::{Builder, File};
+    ///
+    /// let mut builder = Builder::new();
+    /// let archive = builder
+    ///     .comment("a comment")
+    ///     .file(("example-1", "foo"))
+    ///     .file(File::new("example-2", "bar"))
+    ///     .build();
+    ///
+    /// let s = archive.to_string();
+    /// let expected = "\
+    /// a comment
+    /// -- example-1 --
+    /// foo
+    /// -- example-2 --
+    /// bar
+    /// ";
+    ///
+    /// assert_eq!(s, expected);
+    /// ```
+    pub fn build(self) -> Archive {
+        self.inner
+    }
+}
+
 /// An Archive is a collection of [File]s that have been read from a `txtar` file.
 ///
 /// Archives can be created from a file on disk via the [Archive::from_file] method or directly
@@ -157,6 +238,12 @@ impl Archive {
     /// );
     ///
     /// assert!(a.get("bar").is_none());
+    ///
+    /// // Alternatively you may also index directly into the Archive using the file name. This
+    /// // will panic if the file is not present in the archive.
+    /// assert_eq!(&a["file1.txt"], a.get("file1.txt").unwrap());
+    ///
+    /// // a["bar"]; <-- would panic
     /// ```
     pub fn get(&self, filename: &str) -> Option<&File> {
         self.files.iter().find(|f| f.name == filename)
@@ -199,6 +286,14 @@ impl Index<usize> for Archive {
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.files[index]
+    }
+}
+
+impl Index<&str> for Archive {
+    type Output = File;
+
+    fn index(&self, index: &str) -> &Self::Output {
+        self.get(index).expect("unknown file")
     }
 }
 
@@ -251,9 +346,10 @@ pub struct File {
 }
 
 impl File {
-    fn new(name: &str, content: impl Into<String>) -> Self {
+    /// Construct a new [File].
+    pub fn new(name: impl Into<String>, content: impl Into<String>) -> Self {
         Self {
-            name: name.to_string(),
+            name: name.into(),
             content: content.into(),
         }
     }
@@ -263,6 +359,19 @@ impl fmt::Display for File {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "-- {} --", self.name)?;
         write!(f, "{}", fix_trailing_newline(&self.content))
+    }
+}
+
+impl<T, U> From<(T, U)> for File
+where
+    T: Into<String>,
+    U: Into<String>,
+{
+    fn from((name, content): (T, U)) -> Self {
+        Self {
+            name: name.into(),
+            content: content.into(),
+        }
     }
 }
 
